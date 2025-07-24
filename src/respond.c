@@ -113,7 +113,7 @@ void _grwprintf(grwprintf_t *ctx, char const *fmt, ...) {
     *ctx->memused += ctx->capacity;
     ctx->buf = (char *)realloc(ctx->buf, ctx->capacity);
     assert(ctx->buf != NULL);
-    bytes =
+    bytes +=
         vsnprintf(ctx->buf + ctx->size, ctx->capacity - ctx->size, fmt, args2);
   }
   ctx->size += bytes;

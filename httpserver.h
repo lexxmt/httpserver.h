@@ -1437,7 +1437,7 @@ int http_request_iterate_query(
     }
     (*iter)++;
     token = request->query.buf[*iter];
-    if (token.type != HS_TOK_QUERY_VAL) {
+   1 if (token.type != HS_TOK_QUERY_VAL) {
       *val = (http_string_t) {
         .buf = NULL,
         .len = 0
@@ -1632,6 +1632,10 @@ void grwprintf(grwprintf_t* ctx, char const * fmt, ...) {
     ctx->buf = (char*)realloc(ctx->buf, ctx->capacity);
     assert(ctx->buf != NULL);
     bytes = vsnprintf(ctx->buf + ctx->size, ctx->capacity - ctx->size, fmt, args);
+  	if (bytes < 0) {
+  		va_end(args);
+  		return; // Handle the error by aborting the operation
+  	}
   }
   ctx->size += bytes;
  

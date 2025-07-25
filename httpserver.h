@@ -1347,6 +1347,7 @@ void hs_parse_querystring(http_request_t* request, http_string_t query) {
     return;
   }
   http_token_dyn_init(&request->query, 32);
+	tok.index = 0; // Ensure tok.index is initialized for the first character
   for (int i = 0; i < query.len; i++) {
     if (query.buf[i] == '&') {
       if (tok.index != -1) {

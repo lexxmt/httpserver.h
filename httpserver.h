@@ -550,6 +550,7 @@ void hs_server_init(struct http_server_s* serv);
 void hs_delete_events(struct http_request_s* request);
 void hs_add_events(struct http_request_s* request);
 void hs_add_write_event(struct http_request_s* request);
+void hs_add_read_event(struct http_request_s* request);
 void hs_process_tokens(http_request_t* request);
 
 #ifdef KQUEUE
@@ -1123,6 +1124,7 @@ void hs_write_response(http_request_t* request) {
       request->state = HTTP_SESSION_INIT;
       hs_free_buffer(request);
       hs_reset_timeout(request, HTTP_KEEP_ALIVE_TIMEOUT);
+      hs_add_read_event(request);
     } else {
       HTTP_FLAG_SET(request->flags, HTTP_END_SESSION);
     }
@@ -1629,7 +1631,7 @@ void grwprintf(grwprintf_t* ctx, char const * fmt, ...) {
     *ctx->memused += ctx->capacity;
     ctx->buf = (char*)realloc(ctx->buf, ctx->capacity);
     assert(ctx->buf != NULL);
-    bytes += vsnprintf(ctx->buf + ctx->size, ctx->capacity - ctx->size, fmt, args);
+    bytes = vsnprintf(ctx->buf + ctx->size, ctx->capacity - ctx->size, fmt, args);
   }
   ctx->size += bytes;
  
@@ -1922,6 +1924,13 @@ void hs_add_events(http_request_t* request) {
 void hs_add_write_event(http_request_t* request) {
   struct epoll_event ev;
   ev.events = EPOLLOUT | EPOLLET;
+  ev.data.ptr = request;
+  epoll_ctl(request->server->loop, EPOLL_CTL_MOD, request->socket, &ev);
+}
+
+void hs_add_read_event(http_request_t* request) {
+  struct epoll_event ev;
+  ev.events = EPOLLIN | EPOLLET;
   ev.data.ptr = request;
   epoll_ctl(request->server->loop, EPOLL_CTL_MOD, request->socket, &ev);
 }
